@@ -11,12 +11,16 @@ const opts = {
 const rateLimiterMongo = new RateLimiterMongo(opts);
 
 const rateLimiterMiddleware = (req, res, next) => {
+  console.log("middleware")
     rateLimiterMongo.consume(req.ip)
       .then(() => {
         next();
       })
       .catch(() => {
-        res.status(429).send('Too Many Requests');
+        res.status(429).send({
+          seccuss: false,
+          error: "Too Many Requests"
+        });
       });
 };
 

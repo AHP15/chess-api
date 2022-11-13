@@ -8,19 +8,19 @@ const { model, Schema } = mongoose;
 const userSchema = new Schema({
     username: {
         type:String,
-        required: [true, "Please enter a user name!!"],
+        required: [true, "username is required!!"],
         maxlength:[30, "name can not exceed 30 charcters!!"],
         minlength:[4, "name must have at leat 4 characters!!"],
     },
     email:{
         type: String,
-        required: [true, "Please enter a user email!!"],
+        required: [true, "email is required!!"],
         validate:[validator.isEmail, "Please enter a valid email!!"],
         unique: true
     },
     password:{
         type:String,
-        required:[true, "Please enter a password"],
+        required:[true, "password is required!!"],
         minlength: [8, "name must have at leat 8 characters!!"],
         select: false,
     },

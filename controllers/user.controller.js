@@ -9,7 +9,7 @@ export const signup = async (req, res) => {
             seccuss: true,
             user,
         })
-    } catch(err) {
-        handleError(err, 500, res);
+    } catch(err) {  
+        handleError(err, res);
     }
 };
