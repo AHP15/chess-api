@@ -32,7 +32,6 @@
     "helmet": "^6.0.0",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.7.2",
-    "rate-limiter-flexible": "^2.4.1",
     "validator": "^13.7.0",
     "xss-filters": "^1.2.7"
   }

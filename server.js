@@ -12,11 +12,6 @@ const numCPUs = cpus().length;
 DB.mongoose.connect(process.env.CONNECTION_URL)
 .then(() => {
     console.log("Connecting to the DB seccussfully!!");
-    import("./middleware/rateLimiterMongo.js").then(rateLimiterMiddleware => {
-    // counts and limits number of actions by key and protects from 
-    // DDoS and brute force attacks at any scale
-        app.use(rateLimiterMiddleware.default);
-    });
 })
 .catch(err => {
     console.log("Error while connecting to the db", err);

@@ -10,6 +10,9 @@ export const handleError = (err, res) => {
         status = 400;
         message = "Email aleardy exist!"
     }
+    if (err.message.includes("does not exist")) {
+        status = 404;
+    }
 
     res.status(status).send({
         seccuss: false,
