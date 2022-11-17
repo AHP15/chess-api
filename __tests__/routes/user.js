@@ -5,144 +5,137 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const testPostMethod = async (body, url, status) => {
-    // Arrange
-    const user = body;
+const requests = {
+    signup: request(app).post("/api/v1/auth/signup").send({
+        username: "username",
+        email: "username@gmail.com",
+        password: "kljsfdlmsdlsmdds"
+    }),
+    validateSignup: request(app).post("/api/v1/auth/signup").send({
+        username: "username",
+        email: "username@gmail.com",
+    }),
+    duplicateSignup: request(app).post("/api/v1/auth/signup").send({
+        username: "duplicate",
+        email: "duplicate@gmail.com",// this email already exist in DB
+        password: "kljsfdlmsdlsmdds",
+    }),
+    sanatizeSignup: request(app).post("/api/v1/auth/signup").send({
+        username: "<script>code</script>",
+        email: "code@gmail.com",
+        password: "kljsfdlmsdlsmdds",
+    }),
 
-    // Act
-    const response = await request(app)
-        .post(url)
-        .send(user);
-    const { statusCode, _body } = response;
-    if(url === "/api/v1/auth/signup") {
-        await DB.user.findByIdAndDelete(_body.user?._id);
-    }
-
-    // Assertion
-    expect(statusCode).toBe(status);
-    expect(_body.seccuss).toBe(true);
-    if(url === "/api/v1/auth/signup") {
-        expect(_body.user.username).toBe(user.username);
-    }
-    expect(_body.user.email).toBe(user.email);
+    signin: request(app).post("/api/v1/auth/signin").send({
+        email: "duplicate@gmail.com",
+        password: "kljsfdlmsdlsmdds",
+    }),
+    sanatizeSignin: request(app).post("/api/v1/auth/signin").send({
+        email: "<script>code@gmail.com</script>",
+        password: "kljsfdlmsdlsmdds",
+    }),
 };
+export const signinSequentially = () => {
+    const responses = [];
 
-describe("Test the signup route", () => {
+    const oneSignin = () => request(app).post("/api/v1/auth/signin").send({
+        email: "duplicate@gmail.com",
+        password: "kljsfdlmsdlsmdd",// incorrect password "s" missting
+    }).then(res => responses.push(res));
+
+    let p = Promise.resolve(undefined);
+    for (let i = 1; i <= 11; i++) {
+        p = p.then(() => oneSignin());
+    }
     
+    return p.then(() => responses);
+}
+
+jest.setTimeout(60000);
+
+describe("Test the signup and signin routes", () => {
+    let responses;
+    let userIds = [];
+
     beforeAll(async () => {
-       await DB.mongoose.connect(process.env.CONNECTION_URL); 
+        await DB.mongoose.connect(process.env.CONNECTION_URL); 
+        responses = await Promise.allSettled(Object.values(requests));
     });
-
-
-    test("It should response the POST method", async () => {
-        await testPostMethod(
-            {
-                username: "username",
-                email: "username@gmail.com",
-                password: "kljsfdlmsdlsmdds"
-            },
-            "/api/v1/auth/signup",
-            201
-        );
-    });
-
-    test("It should check for missing data in the req body", async () => {
-        // Arrange
-        const user = {
-            username: "username",
-            email: "username@gmail.com",
-        };
-
-        // Act
-        const response = await request(app)
-                                .post("/api/v1/auth/signup")
-                                .send(user);
-        const {statusCode, _body} =  response;
-        // Assertion
-        expect(statusCode).toBe(400);
-        expect(_body.seccuss).toBe(false);
-        expect(_body.error).toMatch(/User validation failed/);
-    });
-    
-    test("It should check for duplicate emails", async () => {
-        // Arrange
-        const user = {
-            username: "duplicate",
-            email: "duplicate@gmail.com",// this email already exist in DB
-            password: "kljsfdlmsdlsmdds",
-        };
-
-        // Act
-        const response = await request(app)
-                                .post("/api/v1/auth/signup")
-                                .send(user);
-        const {statusCode, _body} =  response;
-
-        // Assertion
-        expect(statusCode).toBe(400);
-        expect(_body.seccuss).toBe(false);
-        expect(_body.error).toBe("Email aleardy exist!");
-    });
-
-    test("It should sanatize the req body", async () => {
-        // Arrange
-        const user = {
-            username: "<script>code</script>",
-            email: "code@gmail.com",
-            password: "kljsfdlmsdlsmdds",
-        };
-
-        // Act
-        const response = await request(app)
-                                .post("/api/v1/auth/signup")
-                                .send(user);
-        const {statusCode, _body} =  response;
-        await DB.user.findByIdAndDelete(_body.user?._id);
-        
-        // Assertion
-        expect(statusCode).toBe(201);
-        expect(_body.seccuss).toBe(true);
-        expect(_body.user.username).toBe("&lt;script>code&lt;/script>");
-    });
-});
-
-
-
-describe('Test the signin route', () => {
-
     afterAll(async () => {
+        await Promise.all(userIds);
         await DB.mongoose.disconnect();
     });
 
-    test("It should response to the POST method", async () => {
-        await testPostMethod(
-            {
-                email: "duplicate@gmail.com",
-                password: "kljsfdlmsdlsmdds",
-            },
-            "/api/v1/auth/signin",
-            200
-        );
+    // signup route
+    test("It should respond to the post method for signup route", () => {
+        const res = responses[0];
+        const {statusCode, body} = res.value;
+        userIds.push(DB.user.findByIdAndDelete(body.user._id));
+
+        // Assertion
+        expect(statusCode).toBe(201);
+        expect(body.seccuss).toBe(true);
+        expect(body.user.username).toBe("username");
+    });
+    test("It should validate the request body for signup route", () => {
+        const res = responses[1];
+        const {statusCode, body} = res.value;
+
+        // Assertion
+        expect(statusCode).toBe(400);
+        expect(body.seccuss).toBe(false);
+        expect(body.error).toMatch(/User validation failed/);
+    });
+    test("It should check for duplicate emails in signup route", () => {
+        const res = responses[2];
+        const {statusCode, body} = res.value;
+
+        // Assertion
+        expect(statusCode).toBe(400);
+        expect(body.seccuss).toBe(false);
+        expect(body.error).toBe("Email aleardy exist!");
+    });
+    test("It should sanatize the req body for signup route", () => {
+        const res = responses[3];
+        const {statusCode, body} = res.value;
+        userIds.push(DB.user.findByIdAndDelete(body.user._id));
+
+        // Assertion
+        expect(statusCode).toBe(201);
+        expect(body.seccuss).toBe(true);
+        expect(body.user.username).toBe("&lt;script>code&lt;/script>");
     });
 
-    test("It should sanatize the req body", async () => {
-        // Arrange
-        const user = {
-            email: "<script>code@gmail.com</script>",
-            password: "kljsfdlmsdlsmdds",
-        };
 
-        // Act
-        const response = await request(app)
-                                .post("/api/v1/auth/signin")
-                                .send(user);
-        const {statusCode, _body} =  response;
-        
+    // signin route
+    test("It should response to the POST method in signin route", () => {
+        const res = responses[4];
+        const {statusCode, body} = res.value;
+
+        // Assertion
+        expect(statusCode).toBe(200);
+        expect(body.seccuss).toBe(true);
+        expect(body.user.username).toBe("username");
+    });
+    test("It should sanatize the req body for signin route", () => {
+        const res = responses[5];
+        const {statusCode, body} = res.value;
+
         // Assertion
         expect(statusCode).toBe(404);
-        expect(_body.seccuss).toBe(false);
-        expect(_body.error).toBe(
+        expect(body.seccuss).toBe(false);
+        expect(body.error).toBe(
             "user with email &lt;script>code@gmail.com&lt;/script> does not exist"
         );
+    });
+    test("It block a user after number (10 for now) of fail signin attempts", async () => {
+        // Act
+        const responses = await signinSequentially();
+        const {statusCode, body} = responses[responses.length - 1];
+    
+        // Assertion
+        expect(statusCode).toBe(429);
+        expect(body.seccuss).toBe(false);
+        expect(body.error).toBe("Maximum attempts exeeded! please try after 24 hours");
     });
 });
