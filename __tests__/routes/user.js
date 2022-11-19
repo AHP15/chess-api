@@ -35,21 +35,6 @@ const requests = {
         password: "kljsfdlmsdlsmdds",
     }),
 };
-export const signinSequentially = () => {
-    const responses = [];
-
-    const oneSignin = () => request(app).post("/api/v1/auth/signin").send({
-        email: "duplicate@gmail.com",
-        password: "kljsfdlmsdlsmdd",// incorrect password "s" missting
-    }).then(res => responses.push(res));
-
-    let p = Promise.resolve(undefined);
-    for (let i = 1; i <= 11; i++) {
-        p = p.then(() => oneSignin());
-    }
-    
-    return p.then(() => responses);
-}
 
 jest.setTimeout(60000);
 
@@ -115,7 +100,7 @@ describe("Test the signup and signin routes", () => {
         // Assertion
         expect(statusCode).toBe(200);
         expect(body.seccuss).toBe(true);
-        expect(body.user.username).toBe("username");
+        expect(body.user.username).toBe("duplicate");
     });
     test("It should sanatize the req body for signin route", () => {
         const res = responses[5];
@@ -127,15 +112,5 @@ describe("Test the signup and signin routes", () => {
         expect(body.error).toBe(
             "user with email &lt;script>code@gmail.com&lt;/script> does not exist"
         );
-    });
-    test("It block a user after number (10 for now) of fail signin attempts", async () => {
-        // Act
-        const responses = await signinSequentially();
-        const {statusCode, body} = responses[responses.length - 1];
-    
-        // Assertion
-        expect(statusCode).toBe(429);
-        expect(body.seccuss).toBe(false);
-        expect(body.error).toBe("Maximum attempts exeeded! please try after 24 hours");
     });
 });

@@ -35,12 +35,12 @@ const userSchema = new Schema({
     games: [{
         type: mongoose.Schema.Types.ObjectId,
         ref:"Game"
-    }]
+    }],
 });
 
 userSchema.pre("save", function(next){
     
-    if(!this.isModified("passowrd")){
+    if(!this.isModified("password")){
         next();
     }
 
@@ -81,5 +81,6 @@ userSchema.methods.removeGame = function(gameId) {
 userSchema.methods.setStatus = function(status) {
     this.status = status;
 }
+
 
 export default model("User", userSchema);

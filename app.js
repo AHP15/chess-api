@@ -1,6 +1,7 @@
 import express from "express";
 import helmet  from "helmet";
 import userRouter from "./routes/user.route.js";
+import cors from "cors";
 
 const app = express();
 app.use(express.json());
@@ -10,6 +11,11 @@ app.use(helmet());
 
 // Note: Disabling the X-Powered-By header does not prevent a sophisticated attacker from determining that an app is running Express
 app.disable('x-powered-by');
+
+const corsOptions = {
+    origin: "*",
+}
+app.use(cors(corsOptions));
 
 app.use("/api/v1", userRouter);
 app.get("/", (req, res) => {
