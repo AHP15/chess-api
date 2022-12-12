@@ -9,7 +9,10 @@ dotenv.config();
 const numCPUs = cpus().length;
 
 // connection to the DB
-DB.mongoose.connect(process.env.CONNECTION_URL)
+const Game = DB.game;
+DB.mongoose.connect(process.env.CONNECTION_URL, {
+  dbName: 'chess',
+})
 .then(() => {
     console.log("Connecting to the DB seccussfully!!");
 })
@@ -17,7 +20,6 @@ DB.mongoose.connect(process.env.CONNECTION_URL)
     console.log("Error while connecting to the db", err);
     process.exit();
 });
-
 
 /*
 if (cluster.isPrimary) {

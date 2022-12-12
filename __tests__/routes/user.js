@@ -43,7 +43,12 @@ describe("Test the signup and signin routes", () => {
     let userIds = [];
 
     beforeAll(async () => {
-        await DB.mongoose.connect(process.env.CONNECTION_URL); 
+        await DB.mongoose.connect(process.env.CONNECTION_URL, {
+            dbName: 'chess',
+        });
+        // for performing the validation correctly for more info visit
+        // https://mongoosejs.com/docs/validation.html#the-unique-option-is-not-a-validator
+        // await DB.user.init();
         responses = await Promise.allSettled(Object.values(requests));
     });
     afterAll(async () => {

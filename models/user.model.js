@@ -38,14 +38,6 @@ const userSchema = new Schema({
     }],
 });
 
-userSchema.pre("save", function(next){
-    
-    if(!this.isModified("password")){
-        next();
-    }
-
-    this.password = bcrypt.hashSync(this.password, 10);
-});
 
 userSchema.methods.compatePasswords = function(clientPassword){
     return bcrypt.compareSync(clientPassword, this.password);

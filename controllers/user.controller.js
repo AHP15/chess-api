@@ -1,10 +1,14 @@
 import { handleError } from "../utils/errorHandler.js";
 import sendToken from "../utils/jwt.js";
 import DB from "../models/index.js";
+import bcrypt from "bcryptjs";
 
 const User = DB.user;
 export const signup = async (req, res) => {
     try{
+        if (typeof req.sanatizedData.password !== 'undefined'){
+            req.sanatizedData.password = bcrypt.hashSync(req.sanatizedData.password, 10);
+        }
         const user = await User.create(req.sanatizedData);
         sendToken(user, 201, res);
     } catch(err) {  
