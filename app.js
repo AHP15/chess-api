@@ -1,6 +1,7 @@
 import express from "express";
 import helmet  from "helmet";
 import userRouter from "./routes/user.route.js";
+import gameRouter from "./routes/game.route.js";
 import cors from "cors";
 
 const app = express();
@@ -18,6 +19,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use("/api/v1", userRouter);
+app.use("/api/v1", gameRouter);
 app.get("/", (req, res) => {
     res.json('Hello world');
 });

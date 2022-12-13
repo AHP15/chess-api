@@ -13,9 +13,6 @@ export const handleError = (err, res) => {
     if (err.message.includes("does not exist")) {
         status = 404;
     }
-    if(err.message === "Maximum attempts exeeded! please try after 24 hours") {
-        status = 429;
-    }
     if(err.message === "Incorrect password") {
         status = 401;
     }

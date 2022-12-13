@@ -34,6 +34,10 @@ const requests = {
         email: "<script>code@gmail.com</script>",
         password: "kljsfdlmsdlsmdds",
     }),
+    incorrectPassword: request(app).post("/api/v1/auth/signin").send({
+        email: "duplicate@gmail.com",
+        password: "kljsfdlmsdlsmdd",// incorrect password
+    }),
 };
 
 jest.setTimeout(60000);
@@ -46,7 +50,7 @@ describe("Test the signup and signin routes", () => {
         await DB.mongoose.connect(process.env.CONNECTION_URL, {
             dbName: 'chess',
         });
-        // for performing the validation correctly for more info visit
+        // for performing the validation correctly. for more info visit
         // https://mongoosejs.com/docs/validation.html#the-unique-option-is-not-a-validator
         // await DB.user.init();
         responses = await Promise.allSettled(Object.values(requests));
@@ -117,5 +121,14 @@ describe("Test the signup and signin routes", () => {
         expect(body.error).toBe(
             "user with email &lt;script>code@gmail.com&lt;/script> does not exist"
         );
+    });
+    test('It should check for incorrect password', () => {
+        const res = responses[6];
+        const {statusCode, body} = res.value;
+
+        // Assertion
+        expect(statusCode).toBe(401);
+        expect(body.seccuss).toBe(false);
+        expect(body.error).toBe("Incorrect password");
     });
 });
