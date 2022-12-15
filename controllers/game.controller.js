@@ -7,6 +7,7 @@ export const createGame = async (req, res) => {
     const game = await Game.create(req.body);
     res.status(201).send({
       seccuss: true,
+      game,
       message: 'Game created!',
     });
   } catch(err) {

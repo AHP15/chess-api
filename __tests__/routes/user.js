@@ -12,8 +12,8 @@ const requests = {
         password: "kljsfdlmsdlsmdds"
     }),
     validateSignup: request(app).post("/api/v1/auth/signup").send({
-        username: "username",
         email: "username@gmail.com",
+        password: "nljlqqmk%MQ"
     }),
     duplicateSignup: request(app).post("/api/v1/auth/signup").send({
         username: "duplicate",

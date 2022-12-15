@@ -9,7 +9,7 @@ const requests = {
   createGame: request(app).post("/api/v1/game/new").send({
     whitePlayer: "639744eec32888dd39c2c4c8",
     blackPlayer: "639744eec32888dd39c2c4c8",
-    moves: new Map().set('first_move',  {
+    moves: [{
       publicName: 'move',
       info: {
         name: 'test',
@@ -17,7 +17,7 @@ const requests = {
         y: 2,
         color: 'white',
       },
-    }),
+    }],
   }),
 };
 
@@ -25,6 +25,7 @@ jest.setTimeout(60000);
 
 describe("Test the create game route", () => {
   let responses;
+  let gameIds = [];
   beforeEach(async () => {
     await DB.mongoose.connect(process.env.CONNECTION_URL, {
       dbName: 'chess',
@@ -32,13 +33,14 @@ describe("Test the create game route", () => {
     responses = await Promise.allSettled(Object.values(requests));
   });
   afterEach(async () => {
-    //await Promise.all(userIds);
+    await Promise.all(gameIds);
     await DB.mongoose.disconnect();
   });
 
   test("It shoudl create a new game", () => {
     const res = responses[0];
     const {statusCode, body} = res.value;
+    gameIds.push(DB.game.findByIdAndDelete(body.game._id))
 
     // Assertion
     expect(statusCode).toBe(201);
