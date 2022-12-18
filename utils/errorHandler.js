@@ -18,7 +18,7 @@ export const handleError = (err, res) => {
     }
 
     res.status(status).send({
-        seccuss: false,
+        success: false,
         error: message
     });
 };
