@@ -3,9 +3,11 @@ import helmet  from "helmet";
 import userRouter from "./routes/user.route.js";
 import gameRouter from "./routes/game.route.js";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 // can help protect your app from some well-known web vulnerabilities by setting HTTP headers appropriately
 // visit https://helmetjs.github.io/ for more info
 app.use(helmet());
