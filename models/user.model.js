@@ -43,36 +43,10 @@ userSchema.methods.compatePasswords = function(clientPassword){
     return bcrypt.compareSync(clientPassword, this.password);
 }
 
-
-userSchema.methods.getUserData = function() {
-    return this;
-};
-
 userSchema.methods.getJwtToken = function(){
     return jwt.sign({id: this._id}, process.env.JWT_SECRET, {
         expiresIn: parseFloat(process.env.JWT_EXPIRE)
     });
 };
-
-userSchema.methods.addFriend = function(friendId) {
-    this.friends.push(friendId);
-};
-
-userSchema.methods.addGame = function(gameId) {
-    this.games.push(gameId);
-};
-
-userSchema.methods.removeFriend = function(friendId) {
-
-};
-
-userSchema.methods.removeGame = function(gameId) {
-
-};
-
-userSchema.methods.setStatus = function(status) {
-    this.status = status;
-}
-
 
 export default model("User", userSchema);

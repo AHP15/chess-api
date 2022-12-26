@@ -35,3 +35,67 @@ export const signin = async (req, res) => {
         handleError(err, res);
     }
 };
+
+export const getUserData = async (req, res) => {
+    try {
+        const user = await User.findById(req.userId);
+        res.status(200).send({
+            success: true,
+            user,
+        });
+    } catch(err) {
+        handleError(err, res);
+    }
+}
+
+export const addFriend = async (req, res) => {
+    try {
+        const { email } = res.sanatizedData;
+
+        const friendQuery = () => User.findOne({email: email});
+        const userQuery = () => User.findById(req.userId);
+
+        const queries = await Promise.all([friendQuery, userQuery]);
+
+        const friend = queries[0].value;
+        const user = queries[1].value;
+
+        if (!friend) {
+            throw new Error(`user with email ${email} does not exist`);
+        }
+
+        user.friends.push(friend._id);
+        await user.save();
+
+        res.status(201).send({
+            success: true,
+            message: 'friend added successfully'
+        });
+    } catch(err) {
+        handleError(err, res);
+    }
+}
+
+export const removeFriend = async (req, res) => {
+    try {
+        const { email } = res.body;
+
+        const friendQuery = () => User.findOne({email: email});
+        const userQuery = () => User.findById(req.userId);
+
+        const queries = await Promise.all([friendQuery, userQuery]);
+
+        const friend = queries[0].value;
+        const user = queries[1].value;
+
+        user.friends = user.friends.filter(id => id !== friend._id);
+        await user.save();
+
+        res.status(201).send({
+            success: true,
+            message: 'friend added successfully'
+        });
+    } catch(err) {
+        handleError(err, res);
+    }
+};

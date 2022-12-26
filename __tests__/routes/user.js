@@ -38,6 +38,10 @@ const requests = {
         email: "duplicate@gmail.com",
         password: "kljsfdlmsdlsmdd",// incorrect password
     }),
+    unAuthorrized: request(app).get("/api/v1/user/profile"),
+    inValidToken: request(app).get("/api/v1/user/profile").set(
+        'Cookie', ['token=dmlkjskmqljqlsdjlmkqMLKDQAFZA;'] // dummy token
+    ),
 };
 
 jest.setTimeout(60000);
@@ -68,7 +72,7 @@ describe("Test the signup and signin routes", () => {
 
         // Assertion
         expect(statusCode).toBe(201);
-        expect(body.seccuss).toBe(true);
+        expect(body.success).toBe(true);
         expect(body.user.username).toBe("username");
     });
     test("It should validate the request body for signup route", () => {
@@ -77,7 +81,7 @@ describe("Test the signup and signin routes", () => {
 
         // Assertion
         expect(statusCode).toBe(400);
-        expect(body.seccuss).toBe(false);
+        expect(body.success).toBe(false);
         expect(body.error).toMatch(/User validation failed/);
     });
     test("It should check for duplicate emails in signup route", () => {
@@ -86,7 +90,7 @@ describe("Test the signup and signin routes", () => {
 
         // Assertion
         expect(statusCode).toBe(400);
-        expect(body.seccuss).toBe(false);
+        expect(body.success).toBe(false);
         expect(body.error).toBe("Email aleardy exist!");
     });
     test("It should sanatize the req body for signup route", () => {
@@ -96,7 +100,7 @@ describe("Test the signup and signin routes", () => {
 
         // Assertion
         expect(statusCode).toBe(201);
-        expect(body.seccuss).toBe(true);
+        expect(body.success).toBe(true);
         expect(body.user.username).toBe("&lt;script>code&lt;/script>");
     });
 
@@ -108,7 +112,7 @@ describe("Test the signup and signin routes", () => {
 
         // Assertion
         expect(statusCode).toBe(200);
-        expect(body.seccuss).toBe(true);
+        expect(body.success).toBe(true);
         expect(body.user.username).toBe("duplicate");
     });
     test("It should sanatize the req body for signin route", () => {
@@ -117,7 +121,7 @@ describe("Test the signup and signin routes", () => {
 
         // Assertion
         expect(statusCode).toBe(404);
-        expect(body.seccuss).toBe(false);
+        expect(body.success).toBe(false);
         expect(body.error).toBe(
             "user with email &lt;script>code@gmail.com&lt;/script> does not exist"
         );
@@ -128,7 +132,26 @@ describe("Test the signup and signin routes", () => {
 
         // Assertion
         expect(statusCode).toBe(401);
-        expect(body.seccuss).toBe(false);
+        expect(body.success).toBe(false);
         expect(body.error).toBe("Incorrect password");
+    });
+
+    // profile route
+    test('It should handle unauthorized users', () =>  {
+        const res = responses[7];
+        const {statusCode, body} = res.value;
+
+        // Assertion
+        expect(statusCode).toBe(403);
+        expect(body.success).toBe(false);
+        expect(body.error).toBe("No token is provided!!");
+    });
+    test('It should handle invalid tokens', () =>  {
+        const res = responses[8];
+        const {statusCode, body} = res.value;
+
+        // Assertion
+        expect(statusCode).toBe(401);
+        expect(body.success).toBe(false);
     });
 });

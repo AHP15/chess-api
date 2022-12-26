@@ -1,10 +1,10 @@
 {
-    "env": {
-        "test": {
-            "plugins": [
-                "@babel/plugin-transform-modules-commonjs",
-                "@babel/plugin-syntax-dynamic-import"
-            ]
-        }
+  "env": {
+    "test": {
+      "plugins": [
+        "@babel/plugin-transform-modules-commonjs",
+        "@babel/plugin-syntax-dynamic-import"
+      ]
     }
+  }
 }
