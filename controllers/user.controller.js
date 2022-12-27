@@ -36,6 +36,20 @@ export const signin = async (req, res) => {
     }
 };
 
+export const signout = async (req, res) => {
+    try {
+        const user = await User.findById(req.userId);
+        user.status = 'offline';
+        res.status(200).send({
+            success: true,
+            message: 'SignOut successfully'
+        });
+        await user.save();
+    } catch(err) {
+        handleError(err, res);
+    }
+};
+
 export const getUserData = async (req, res) => {
     try {
         const user = await User.findById(req.userId);
@@ -50,7 +64,7 @@ export const getUserData = async (req, res) => {
 
 export const addFriend = async (req, res) => {
     try {
-        const { email } = res.sanatizedData;
+        const { email } = req.sanatizedData;
 
         const friendQuery = () => User.findOne({email: email});
         const userQuery = () => User.findById(req.userId);
