@@ -18,7 +18,9 @@ export const signup = async (req, res) => {
 export const signin = async (req, res) => {
     const {email, password} = req.sanatizedData;
     try{
-        const user = await User.findOne({ email }).select("+password");
+        const user = await User.findOne({ email })
+          .select("+password")
+          .populate('friends', ['email', 'status']);
 
         if (!user) {
             throw new Error(`user with email ${email} does not exist`);
@@ -52,7 +54,8 @@ export const signout = async (req, res) => {
 
 export const getUserData = async (req, res) => {
     try {
-        const user = await User.findById(req.userId);
+        const user = await User.findById(req.userId)
+          .populate('friends', ['email', 'status']);
         res.status(200).send({
             success: true,
             user,
@@ -66,23 +69,31 @@ export const addFriend = async (req, res) => {
     try {
         const { email } = req.sanatizedData;
 
-        const friendQuery = () => User.findOne({email: email});
+        const friendQuery = () => User.findOne({email});
         const userQuery = () => User.findById(req.userId);
 
-        const queries = await Promise.all([friendQuery, userQuery]);
+        const queries = await Promise.all([friendQuery(), userQuery()]);
 
-        const friend = queries[0].value;
-        const user = queries[1].value;
+        const friend = queries[0];
+        const user = queries[1];
 
         if (!friend) {
             throw new Error(`user with email ${email} does not exist`);
         }
 
+        if(user.friends.some(id => String(id) === String(friend._id))) {
+            throw new Error(`user with email ${email} already a friend`);
+        }
         user.friends.push(friend._id);
         await user.save();
 
         res.status(201).send({
             success: true,
+            friend: {
+                _id: friend._id,
+                email: friend.email,
+                status: friend.status,
+            },
             message: 'friend added successfully'
         });
     } catch(err) {
@@ -92,17 +103,17 @@ export const addFriend = async (req, res) => {
 
 export const removeFriend = async (req, res) => {
     try {
-        const { email } = res.body;
+        const { id } = req.body;
 
-        const friendQuery = () => User.findOne({email: email});
+        const friendQuery = () => User.findById(id);
         const userQuery = () => User.findById(req.userId);
 
-        const queries = await Promise.all([friendQuery, userQuery]);
+        const queries = await Promise.all([friendQuery(), userQuery()]);
 
-        const friend = queries[0].value;
-        const user = queries[1].value;
+        const friend = queries[0];
+        const user = queries[1];
 
-        user.friends = user.friends.filter(id => id !== friend._id);
+        user.friends = user.friends.filter(id => String(id) !== String(friend._id));
         await user.save();
 
         res.status(201).send({
