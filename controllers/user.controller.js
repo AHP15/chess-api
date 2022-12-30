@@ -32,6 +32,8 @@ export const signin = async (req, res) => {
             throw new Error('Incorrect password');
         }
 
+        user.status = 'online';
+        await user.save();
         sendToken(user, 200, res);
     } catch(err) {  
         handleError(err, res);
@@ -94,7 +96,7 @@ export const addFriend = async (req, res) => {
                 email: friend.email,
                 status: friend.status,
             },
-            message: 'friend added successfully'
+            message: 'Friend added successfully'
         });
     } catch(err) {
         handleError(err, res);
@@ -118,9 +120,31 @@ export const removeFriend = async (req, res) => {
 
         res.status(201).send({
             success: true,
-            message: 'friend added successfully'
+            message: 'Friend removed successfully'
         });
     } catch(err) {
         handleError(err, res);
     }
 };
+
+export const challenge = async (req, res) => {
+    try {
+        const { email } = req.sanatizedData;
+        const friend = await User.findOne({email});
+
+        if (!friend) {
+            throw new Error(`user with email ${email} does not exist`);
+        }
+
+        if (friend.status === 'offline') {
+            throw new Error(`${friend.username} is offline now, please try later`);
+        };
+
+        res.status(200).send({
+            success: true,
+            message: 'Challenge sent successfully'
+        });
+    } catch(err) {
+      handleError(err, res);
+    }
+  };

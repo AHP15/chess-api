@@ -39,6 +39,7 @@ const gameSchema = new Schema({
             canPromote: Boolean,
         }
     }],
+    pieaces: [],
     winner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
