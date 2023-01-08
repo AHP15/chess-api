@@ -13,8 +13,6 @@ import {
 import { verifyToken } from "../middleware/jwt.js";
 import { sanatizeReqBody } from "../middleware/sanatizeData.js";
 
-import { toggleToken } from "../utils/token.js";
-
 const router = express.Router();
 
 router.route("/auth/signup").post(sanatizeReqBody, signup);
@@ -26,11 +24,5 @@ router.route("/user/friend/new").post(verifyToken, sanatizeReqBody, addFriend);
 router.route("/user/friend/delete").post(verifyToken, sanatizeReqBody, removeFriend);
 router.route("/user/friend/challenge").post(verifyToken, sanatizeReqBody, challenge);
 
-router.route("/auth/callback").get((req, res) => {
-  res.status(200).send({
-    success: true,
-    callback: `const toggleToken = ${toggleToken.toString()}`
-  })
-});
 
 export default router;
