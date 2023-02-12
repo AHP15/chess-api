@@ -20,8 +20,6 @@ DB.mongoose.connect(process.env.CONNECTION_URL, {
     process.exit();
   });
 
-app.get("/", (req, res) => res.send({ message: "This is a Rest api for a chess app" }));
-
 if (cluster.isPrimary) {
     // Fork workers.
   for (let i = 0; i < numCPUs; i++) {

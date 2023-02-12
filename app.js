@@ -16,16 +16,14 @@ app.use(helmet());
 app.disable('x-powered-by');
 
 const corsOptions = {
-    origin: 'http://localhost:5173',
+    origin: 'https://chess-client-indol.vercel.app/',
     credentials: true,
 }
 app.use(cors(corsOptions));
 
 app.use("/api/v1", userRouter);
 app.use("/api/v1", gameRouter);
-app.get("/", (req, res) => {
-    res.json('Hello world');
-});
+app.get("/", (req, res) => res.send({ message: "This is a Rest api for a chess app" }));
 
 
 
