@@ -20,7 +20,6 @@ DB.mongoose.connect(process.env.CONNECTION_URL, {
     process.exit();
   });
 
-/*
 if (cluster.isPrimary) {
     // Fork workers.
   for (let i = 0; i < numCPUs; i++) {
@@ -37,7 +36,8 @@ else {
         console.log("server listening on port ", port);
     });
 }
-*/
+
+app.get("/", (req, res) => res.send({ message: "This is a Rest api for a chess app" }));
 
 const port = process.env.PORT ?? 8080;
 app.listen(port, () => {
