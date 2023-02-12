@@ -16,7 +16,7 @@ app.use(helmet());
 app.disable('x-powered-by');
 
 const corsOptions = {
-    origin: 'https://chess-client-indol.vercel.app/',
+    origin: 'https://chess-client-indol.vercel.app',
     credentials: true,
 }
 app.use(cors(corsOptions));
