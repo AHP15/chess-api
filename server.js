@@ -9,7 +9,7 @@ dotenv.config();
 const numCPUs = cpus().length;
 
 // connection to the DB
-DB.mongoose.connect(process.env.CONNECTION_URL, {
+DB.mongoose.set('strictQuery', false).connect(process.env.CONNECTION_URL, {
   dbName: 'chess',
 })
   .then(() => {
@@ -19,6 +19,8 @@ DB.mongoose.connect(process.env.CONNECTION_URL, {
     console.log("Error while connecting to the db", err);
     process.exit();
   });
+
+app.get("/", (req, res) => res.send({ message: "This is a Rest api for a chess app" }));
 
 if (cluster.isPrimary) {
     // Fork workers.
@@ -36,10 +38,3 @@ else {
         console.log("server listening on port ", port);
     });
 }
-
-app.get("/", (req, res) => res.send({ message: "This is a Rest api for a chess app" }));
-
-const port = process.env.PORT ?? 8080;
-app.listen(port, () => {
-  console.log("server listening on port ", port);
-});
